@@ -1,0 +1,32 @@
+name: Build and Push Docker Image to GHCR
+
+on:
+  schedule:
+    - cron: '0 4 * * *'  # 每天凌晨4点 UTC
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/qinglong-playwright:latest
+          # 你也可以根据需要加版本标签，比如: 1.0, 或者 commit SHA
+
+      - name: Show pushed image info
+        run: echo "Image pushed to ghcr.io/${{ github.repository_owner }}/qinglong-playwright:latest"
