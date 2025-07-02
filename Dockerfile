@@ -1,6 +1,6 @@
 FROM whyour/qinglong:debian
 
-# 安装系统依赖，删除不必要的包，删缓存，避免带有开发和建议包
+# 安装系统依赖和 curl（青龙脚本需要）
 RUN apt-get update && apt-get install -y --no-install-recommends \
       curl \
       ca-certificates \
@@ -28,19 +28,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       wget \
     && rm -rf /var/lib/apt/lists/*
 
-# 安装 Node.js 18（干净安装，去除包缓存）
+# 安装 Node.js 18 (官方源)
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
     apt-get install -y --no-install-recommends nodejs && \
     npm install -g npm@latest && \
-    apt-get purge -y --auto-remove curl && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# 安装 playwright 和 firefox
+# 安装 playwright 和只安装 Firefox 浏览器内核
 RUN pip3 install --no-cache-dir playwright && \
     playwright install firefox && \
-    # 清理安装过程中临时文件
+    # 清理 pip 和 playwright 缓存
     rm -rf ~/.cache/pip ~/.cache/ms-playwright /root/.cache
 
 WORKDIR /ql
-
-# CMD保持青龙默认，或者根据需求定制
